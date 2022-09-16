@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include exchange *.css
+recursive-include exchange *.csv
+recursive-include exchange *.html
+recursive-include exchange *.ico
+recursive-include exchange *.js
+recursive-include exchange *.json
+recursive-include exchange *.md
+recursive-include exchange *.png
+recursive-include exchange *.py
+recursive-include exchange *.svg
+recursive-include exchange *.txt
+recursive-exclude exchange *.pyc
