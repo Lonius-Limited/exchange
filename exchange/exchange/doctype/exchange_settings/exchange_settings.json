@@ -1,0 +1,128 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-09-19 23:13:25.769578",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "client_registry_settings_section",
+  "client_key",
+  "client_search_endpoint",
+  "column_break_4",
+  "client_secret",
+  "provider_registry_settings_section",
+  "provider_key",
+  "provider_search_endpoint",
+  "column_break_9",
+  "provider_secret",
+  "shared_health_record_settings_section",
+  "shr_key",
+  "shr_search_endpoint",
+  "column_break_13",
+  "shr_secret",
+  "shr_update_endpoint"
+ ],
+ "fields": [
+  {
+   "fieldname": "client_registry_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Client Registry Settings"
+  },
+  {
+   "fieldname": "client_key",
+   "fieldtype": "Data",
+   "label": "Client Registry Key"
+  },
+  {
+   "fieldname": "client_secret",
+   "fieldtype": "Data",
+   "label": "Client Registry Secret"
+  },
+  {
+   "fieldname": "client_search_endpoint",
+   "fieldtype": "Data",
+   "label": "Client Registry Search Endpoint"
+  },
+  {
+   "fieldname": "provider_registry_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Provider Registry Settings"
+  },
+  {
+   "fieldname": "provider_key",
+   "fieldtype": "Data",
+   "label": "Provider Registry Key"
+  },
+  {
+   "fieldname": "provider_secret",
+   "fieldtype": "Data",
+   "label": "Provider Registry Secret"
+  },
+  {
+   "fieldname": "provider_search_endpoint",
+   "fieldtype": "Data",
+   "label": "Provider Registry Search Endpoint"
+  },
+  {
+   "fieldname": "shared_health_record_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Shared Health Record Settings"
+  },
+  {
+   "fieldname": "shr_key",
+   "fieldtype": "Data",
+   "label": "SHR Key"
+  },
+  {
+   "fieldname": "shr_secret",
+   "fieldtype": "Data",
+   "label": "SHR Secret"
+  },
+  {
+   "fieldname": "shr_search_endpoint",
+   "fieldtype": "Data",
+   "label": "SHR Search Endpoint"
+  },
+  {
+   "fieldname": "shr_update_endpoint",
+   "fieldtype": "Data",
+   "label": "SHR Update Endpoint"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-09-19 23:19:24.634622",
+ "modified_by": "Administrator",
+ "module": "Exchange",
+ "name": "Exchange Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
