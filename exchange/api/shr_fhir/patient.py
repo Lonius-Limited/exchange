@@ -1,18 +1,13 @@
 import frappe
-import asyncio
+# import asyncio
 import json
 import re
-from fhirpy import AsyncFHIRClient
-from fhirpy import SyncFHIRClient
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
 from fhir.resources.contactpoint import ContactPoint
 from fhir.resources.identifier import Identifier
 
-def fhir_server_connect():
-	fhir_api_key = frappe.db.get_single_value('Exchange Settings', 'shr_key') or "api_key"
-	fhir_api_secret = frappe.db.get_single_value('Exchange Settings', 'shr_secret') or "api_secret"
-	return SyncFHIRClient(url='http://hie.loniushealth.com:8081/fhir', extra_headers={fhir_api_key:fhir_api_secret})
+from exchange.api.connect import fhir_server_connect
 
 def validate_date(the_date, throw=False):
 	if not the_date:
@@ -98,34 +93,3 @@ def register_patient(
 	#SAVE THE RECORD
 	shr.resource('Patient',**json.loads(patient.json())).save()
 	return patient
-
-
-
-
-async def main():
-	# Create an instance
-	client = AsyncFHIRClient(
-		'http://hie.loniushealth.com:8081/fhir',
-		authorization='Bearer TOKEN',
-	)
-
-	# Search for patients
-	# resources = client.resources('Patient')  # Return lazy search set
-	# resources = resources.search(name='John').limit(10).sort('name')
-	# patients = await resources.fetch()  # Returns list of AsyncFHIRResource
-
-	# Create Organization resource
-	organization = client.resource(
-		'Organization',
-		name='Moi Teaching & Referral Hospital',
-		active=True
-	)
-	await organization.save()
-	org_resources = client.resources('Organization')
-	# Lazy loading resources page by page with page count = 100
-	async for org_resource in org_resources.limit(100):
-		print(org_resource.serialize())
-
-def create_organization():
-	loop = asyncio.get_event_loop()
-	loop.run_until_complete(create_organization_async())
