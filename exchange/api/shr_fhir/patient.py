@@ -2,12 +2,11 @@ import frappe
 # import asyncio
 import json
 import re
+from exchange.api.shr_fhir.connect import fhir_server_connect
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
 from fhir.resources.contactpoint import ContactPoint
 from fhir.resources.identifier import Identifier
-
-from exchange.api.shr_fhir.connect import fhir_server_connect
 
 def validate_date(the_date, throw=False):
 	if not the_date:
@@ -22,14 +21,17 @@ def validate_date(the_date, throw=False):
 	return bool(match)
 
 def update_patient_details(shr, patient, payload):
-	patient.name[0].given[0] = payload.get("first_name")
-	patient.name[0].given[1] = payload.get("middle_name")
-	patient.name[0].family = payload.get("last_name")
-	patient.gender = payload.get("gender")
-	validate_date(payload.get("birth_date"), True)
-	patient.birthDate = payload.get("birth_date")
-	patient.telecom[0].value = payload.get("phone")
-	patient.telecom[1].value = payload.get("email") or f'{patient_id}@lonius.co.ke'
+	patient.name[0].given[0] = payload.get("first_name") or '-'
+	patient.name[0].given[1] = payload.get("middle_name") or '-'
+	patient.name[0].family = payload.get("last_name") or '-'
+	if payload.get('gender'): patient.gender = payload.get('gender')
+	birth_date = payload.get('birth_date')
+	if birth_date:
+		validate_date(birth_date, True)
+		patient.birthDate = birth_date
+	patient.telecom[0].value = payload.get("phone") or '-'
+	client_id = payload.get('client_id')
+	patient.telecom[1].value = payload.get("email") or f'{client_id}@lonius.co.ke'
 	shr.resource('Patient',**json.loads(patient.json())).save()
 	return patient
 
@@ -85,4 +87,7 @@ def shr_post_patient(payload):
 
 	#SAVE THE RECORD
 	shr.resource('Patient',**json.loads(patient.json())).save()
+	# patients_resources = shr.resources('Patient')
+	# patient_with_id_obj = patients_resources.search(identifier__value = client_id).first()
+	# patient_with_id = Patient.parse_obj(patient_with_id_obj.serialize()) if patient_with_id_obj else None
 	return patient

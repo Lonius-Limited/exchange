@@ -1,7 +1,7 @@
 import frappe
 
 @frappe.whitelist()
-def validate_provider(id):
+def validate_provider(provider_id):
     #CONNECT TO THE PROVIDER REGISTRY AND CHECK FOR EXISTENCE OF THE ID WHETHER VALID (E.G. LICENCE)
     #THE PROVIDER REGISTRY SHOULD VALIDATE LICENCE VALIDITY BEFORE RETURNING TRUE
     return True
