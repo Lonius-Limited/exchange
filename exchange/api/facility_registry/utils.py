@@ -1,7 +1,11 @@
 import frappe
 
 @frappe.whitelist()
-def create_credentials(email, facility_name):
+def create_credentials(payload):
+	payload = frappe._dict(payload)
+	email, facility_name = payload.get("email"), payload.get("facility_name")
+	if not email or not facility_name:
+		frappe.throw("Please provide both the email and facility name in order to register.")
 	frappe.only_for("System Manager")
 	if frappe.db.exists("User", email, cache=True):
 		return generate_api_keys(email)
@@ -28,4 +32,5 @@ def generate_api_keys(user):
 		user_details.api_key = api_key
 	user_details.api_secret = api_secret
 	user_details.save()
+	user_details.api_secret = api_secret
 	return user_details
