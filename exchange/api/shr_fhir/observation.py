@@ -1,11 +1,10 @@
 import frappe
-import asyncio
-import json
+from datetime import datetime
 from fhirpy.base.exceptions import (
 	ResourceNotFound,
 	OperationOutcome,
 	MultipleResourcesFound,
-	InvalidResponse,
+	InvalidResponse
 )
 from exchange.api.shr_fhir.connect import fhir_server_connect
 from exchange.api.client_registry.utils import validate_patient
@@ -15,20 +14,20 @@ from fhir.resources.observation import Observation
 from fhir.resources.patient import Patient
 
 @frappe.whitelist()
-async def shr_post_vitals(payload):
+def shr_post_vitals(payload):
 	client_id = payload.get('client_id')
 	validate_patient(client_id)
 	validate_provider(payload.get('provider_id'))
 	validate_facility(payload.get('facility_id'))
 	if not payload.get('date_time'):
 		frappe.throw('Please provide the date and time that these vitals were taken')
-	shr = fhir_server_connect()
+	shr = fhir_server_connect(use_async = False)
 	patients = shr.resources('Patient')
 	try:
-		patient = await patients.search(identifier_system = 'https://client_registry.lonius.cloud',  identifier_value = client_id).get()
-		patient_id = 200
-		#observation = await _generate_observation_bundle(shr, patient_id, payload)
-		return patient_id
+		patient = patients.search(identifier = client_id).get()
+		# patient_id = patient['id']
+		observation = _generate_observation_bundle(shr, patient, payload)
+		return observation
 	except ResourceNotFound:
 		frappe.throw('We could not find a client with that ID in the Shared Health Record Repository. Try registering the patient again.')
 	except MultipleResourcesFound:
@@ -38,14 +37,13 @@ async def shr_post_vitals(payload):
 		frappe.throw(f'There was an operational error: {e}')
 	except InvalidResponse:
 		frappe.throw('There was an error while trying to process the request. Try again later')
-async def _generate_observation_bundle(shr, patient, payload):
-	# vitals_elements = ["respiratory_rate", "heart_rate", "systolic_bp", "diastolic_bp", "body_temperature", "weight", "height", "oxygen_saturation"]
-	vitals_elements = ["body_temperature"]
-	patient_id = patient
+def _generate_observation_bundle(shr, patient, payload):
+	vitals_elements = ["respiratory_rate", "heart_rate", "systolic_bp", "diastolic_bp", "body_temperature", "weight", "height", "oxygen_saturation"]
+	# patient_id = patient
 	hasMember = []
 	for element in vitals_elements:
 		if payload.get(element): 
-			element_observaton = await _save_single_observation(shr, patient_id, payload.get('date_time'), element, payload.get(element))
+			element_observaton = _save_single_observation(shr, patient, payload.get('date_time'), element, payload.get(element))
 			element_observation_id = element_observaton['id']
 			hasMember.append(
 				{
@@ -53,11 +51,10 @@ async def _generate_observation_bundle(shr, patient, payload):
 				}
 			)
 	observation = shr.resource('Observation')
-	observation['status'] = 'generated'
-	observation['effectiveDateTime'] = date_time
-	observation['subject'] = {
-		'reference' : f'Patient/{patient_id}'
-	}
+	observation['status'] = 'final'
+	observation['effectiveDateTime'] = payload.get('date_time')
+	observation['issued'] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+	observation['subject'] = patient.to_reference()
 	observation['category'] = [
 		{
 			"coding": [
@@ -80,16 +77,15 @@ async def _generate_observation_bundle(shr, patient, payload):
 		"text": "Vital signs Panel"
 	}
 	observation['hasMember'] = hasMember
-	await observation.save()
+	observation.save()
 	return observation
 
-async def _save_single_observation(shr, patient_id, date_time, observation, value):
+def _save_single_observation(shr, patient, date_time, element, value):
 	observation = shr.resource('Observation')
 	observation['status'] = 'registered'
 	observation['effectiveDateTime'] = date_time
-	observation['subject'] = {
-		'reference' : f'Patient/{patient_id}'
-	}
+	observation['issued'] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+	observation['subject'] = patient.to_reference()
 	observation['category'] = [
 		{
 			"coding": [
@@ -101,11 +97,11 @@ async def _save_single_observation(shr, patient_id, date_time, observation, valu
 			]
 		}
 	]
-	code = _return_observation_code(observation)
+	code = _return_observation_code(element)
 	if code: observation['code'] = code
-	result = _return_observation_result(observation, value)
+	result = _return_observation_result(element, value)
 	if result: observation['valueQuantity'] = result
-	await observation.save()
+	observation.save()
 	return observation
 	
 def _return_observation_code(observation):
@@ -135,6 +131,83 @@ def _return_observation_code(observation):
 			],
 			"text": "Temperature"
 		}
+	elif observation == 'respiratory_rate':
+		return {
+			"coding": [
+       			{
+					"system": "http://loinc.org",
+					"code": "9279-1",
+					"display": "Respiratory Rate"
+				}
+            ],
+			"text": "Respiratory Rate"
+		}
+	elif observation == 'heart_rate':
+		return {
+			"coding": [
+       			{
+					"system": "http://loinc.org",
+					"code": "8867-4",
+					"display": "Heart Rate"
+				}
+            ],
+			"text": "Heart Rate"
+		}
+	elif observation == 'systolic_bp':
+		return {
+			"coding": [
+       			{
+					"system": "http://loinc.org",
+					"code": "8480-6",
+					"display": "Systolic Blood Pressure"
+				}
+            ],
+			"text": "Systolic Blood Pressure"
+		}
+	elif observation == 'diastolic_bp':
+		return {
+			"coding": [
+       			{
+					"system": "http://loinc.org",
+					"code": "8462-4",
+					"display": "Diastolic Blood Pressure"
+				}
+            ],
+			"text": "Diastolic Blood Pressure"
+		}
+	elif observation == 'weight':
+		return {
+			"coding": [
+       			{
+					"system": "http://loinc.org",
+					"code": "29463-7",
+					"display": "Body Weight"
+				}
+            ],
+			"text": "Body Weight"
+		}
+	elif observation == 'height':
+		return {
+			"coding": [
+       			{
+					"system": "http://loinc.org",
+					"code": "8302-2",
+					"display": "Body Height"
+				}
+            ],
+			"text": "Body Height"
+		}
+	elif observation == 'oxygen_saturation':
+		return {
+			"coding": [
+       			{
+					"system": "http://loinc.org",
+					"code": "2708-6",
+					"display": "Oxygen Saturation"
+				}
+            ],
+			"text": "Oxygen Saturation"
+		}
 	else:
 		return None
 
@@ -145,6 +218,55 @@ def _return_observation_result(observation, value):
 			"unit": "degrees C",
 			"system": "http://unitsofmeasure.org",
 			"code": "Cel"
+		}
+	elif observation == 'respiratory_rate':
+		return {
+			"value": value,
+			"unit": "/min",
+			"system": "http://unitsofmeasure.org",
+			"code": "/min"
+		}
+	elif observation == 'heart_rate':
+		return {
+			"value": value,
+			"unit": "/min",
+			"system": "http://unitsofmeasure.org",
+			"code": "/min"
+		}
+	elif observation == 'systolic_bp':
+		return {
+			"value": value,
+			"unit": "mm[Hg]",
+			"system": "http://unitsofmeasure.org",
+			"code": "mm[Hg]"
+		}
+	elif observation == 'diastolic_bp':
+		return {
+			"value": value,
+			"unit": "mm[Hg]",
+			"system": "http://unitsofmeasure.org",
+			"code": "mm[Hg]"
+		}
+	elif observation == 'weight':
+		return {
+			"value": value,
+			"unit": "kg",
+			"system": "http://unitsofmeasure.org",
+			"code": "kg"
+		}
+	elif observation == 'height':
+		return {
+			"value": value,
+			"unit": "cm",
+			"system": "http://unitsofmeasure.org",
+			"code": "cm"
+		}
+	elif observation == 'oxygen_saturation':
+		return {
+			"value": value,
+			"unit": "%",
+			"system": "http://unitsofmeasure.org",
+			"code": "%"
 		}
 	else:
 		return None
