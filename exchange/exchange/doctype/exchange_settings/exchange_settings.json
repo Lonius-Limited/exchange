@@ -20,10 +20,7 @@
   "shr_key",
   "shr_search_endpoint",
   "column_break_13",
-  "shr_secret",
-  "shr_update_endpoint",
-  "section_break_17",
-  "exchange_url"
+  "shr_secret"
  ],
  "fields": [
   {
@@ -84,12 +81,7 @@
   {
    "fieldname": "shr_search_endpoint",
    "fieldtype": "Data",
-   "label": "SHR Search Endpoint"
-  },
-  {
-   "fieldname": "shr_update_endpoint",
-   "fieldtype": "Data",
-   "label": "SHR Update Endpoint"
+   "label": "SHR FHIR Endpoint"
   },
   {
    "fieldname": "column_break_4",
@@ -102,21 +94,12 @@
   {
    "fieldname": "column_break_13",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_17",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "exchange_url",
-   "fieldtype": "Data",
-   "label": "Exchange URL"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-10-16 22:46:30.363594",
+ "modified": "2022-10-17 11:04:10.425274",
  "modified_by": "Administrator",
  "module": "Exchange",
  "name": "Exchange Settings",
