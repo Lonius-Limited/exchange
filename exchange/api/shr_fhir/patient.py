@@ -2,6 +2,12 @@ import frappe
 # import asyncio
 import json
 import re
+from fhirpy.base.exceptions import (
+	ResourceNotFound,
+	OperationOutcome,
+	MultipleResourcesFound,
+	InvalidResponse
+)
 from exchange.api.shr_fhir.connect import fhir_server_connect
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
@@ -21,19 +27,34 @@ def validate_date(the_date, throw=False):
 	return bool(match)
 
 def update_patient_details(shr, patient, payload):
-	patient.name[0].given[0] = payload.get("first_name") or '-'
-	patient.name[0].given[1] = payload.get("middle_name") or '-'
-	patient.name[0].family = payload.get("last_name") or '-'
-	if payload.get('gender'): patient.gender = payload.get('gender')
-	birth_date = payload.get('birth_date')
-	if birth_date:
-		validate_date(birth_date, True)
-		patient.birthDate = birth_date
-	patient.telecom[0].value = payload.get("phone") or '-'
-	client_id = payload.get('client_id')
-	patient.telecom[1].value = payload.get("email") or f'{client_id}@lonius.co.ke'
-	shr.resource('Patient',**json.loads(patient.json())).save()
-	return patient
+	try:
+		patient.name[0].given[0] = payload.get("first_name") or '-'
+		patient.name[0].given[1] = payload.get("middle_name") or '-'
+		patient.name[0].family = payload.get("last_name") or '-'
+		if payload.get('gender'): patient.gender = payload.get('gender')
+		birth_date = payload.get('birth_date')
+		if birth_date:
+			validate_date(birth_date, True)
+			patient.birthDate = birth_date
+		patient.telecom[0].value = payload.get("phone") or '-'
+		client_id = payload.get('client_id')
+		patient.telecom[1].value = payload.get("email") or f'{client_id}@lonius.co.ke'
+		shr.resource('Patient',**json.loads(patient.json())).save()
+		#GET LATEST VITALS
+		vitals = shr.resources('Observation')
+		vitals.sort('status', '-date', 'category')
+		vitals.search(subject=patient.id)
+		vitals.limit(10)
+		vitals.fetch()
+		return patient, vitals
+	except ResourceNotFound as e:
+		frappe.throw(f'{e}.')
+	except MultipleResourcesFound as e:
+		frappe.throw(f'{e}.')
+	except OperationOutcome as e:
+		frappe.throw(f'There was an operational error: {e}')
+	except InvalidResponse as e:
+		frappe.throw(f'{e}.')
 
 @frappe.whitelist()
 def shr_post_patient(payload):
