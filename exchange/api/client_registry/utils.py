@@ -21,6 +21,6 @@ def post_client(payload):
 	payload = {'payload': payload}
 	cr_data = requests.post(api_url, json=payload, headers=headers)
 	payload = json.loads(cr_data.text).get('message')#cr_data.json()
-	frappe.msgprint(payload)
+	# frappe.msgprint(payload)
 	# payload.update(client_id, payload.get('client_id') or 201)
 	return payload

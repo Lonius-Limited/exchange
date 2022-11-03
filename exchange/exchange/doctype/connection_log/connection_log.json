@@ -1,0 +1,91 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:LOG-{YY}{MM}{DD}-{#######}",
+ "creation": "2022-11-02 12:38:12.348022",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "category",
+  "category_detail",
+  "facility",
+  "provider_id",
+  "provider",
+  "client_id",
+  "client",
+  "details"
+ ],
+ "fields": [
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "label": "Category",
+   "options": "Connection Category"
+  },
+  {
+   "fieldname": "facility",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Facility",
+   "options": "User"
+  },
+  {
+   "fieldname": "provider_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Provider ID"
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Data",
+   "label": "Provider"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Small Text",
+   "label": "Details"
+  },
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Client ID"
+  },
+  {
+   "fieldname": "client",
+   "fieldtype": "Small Text",
+   "label": "Client"
+  },
+  {
+   "fetch_from": "category.category",
+   "fieldname": "category_detail",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Category Detail"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-11-03 00:09:30.865259",
+ "modified_by": "Administrator",
+ "module": "Exchange",
+ "name": "Connection Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -8,11 +8,14 @@ from fhirpy.base.exceptions import (
 	MultipleResourcesFound,
 	InvalidResponse
 )
-from exchange.api.shr_fhir.connect import fhir_server_connect
+from exchange.api.shr_fhir.connect import fhir_server_connect, fhir_server_get_resource
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
 from fhir.resources.contactpoint import ContactPoint
 from fhir.resources.identifier import Identifier
+from fhir.resources.bundle import Bundle
+
+shr = fhir_server_connect()
 
 def validate_date(the_date, throw=False):
 	if not the_date:
@@ -28,10 +31,10 @@ def validate_date(the_date, throw=False):
 
 def update_patient_details(shr, patient, payload):
 	try:
-		patient.name[0].given[0] = payload.get("first_name") or '-'
-		patient.name[0].given[1] = payload.get("middle_name") or '-'
-		patient.name[0].family = payload.get("last_name") or '-'
-		if payload.get('gender'): patient.gender = payload.get('gender')
+		if payload.get('first_name'): patient.name[0].given[0] = payload.get("first_name") or '-'
+		if payload.get('middle_name'): patient.name[0].given[1] = payload.get("middle_name") or '-'
+		if payload.get('last_name'): patient.name[0].family = payload.get("last_name") or '-'
+		if payload.get('gender'): patient.gender = payload.get('gender').lower()
 		birth_date = payload.get('birth_date')
 		if birth_date:
 			validate_date(birth_date, True)
@@ -40,13 +43,16 @@ def update_patient_details(shr, patient, payload):
 		client_id = payload.get('client_id')
 		patient.telecom[1].value = payload.get("email") or f'{client_id}@lonius.co.ke'
 		shr.resource('Patient',**json.loads(patient.json())).save()
-		#GET LATEST VITALS
-		vitals = shr.resources('Observation')
-		vitals.sort('status', '-date', 'category')
-		vitals.search(subject=patient.id)
-		vitals.limit(10)
-		vitals.fetch()
-		return patient, vitals
+		#GET PATIENT DETAILS (JSON)
+		patient_id = patient.id
+		# patient_data = _get_patient(patient_id)
+		#GET EVERYTHING ABOUT THIS PATIENT AND RETURN.
+		filters = {}
+		patient_data = fhir_server_get_resource(resourceType = f"Patient/{patient_id}/$everything?_format=json", payload = filters)
+		# bundle = Bundle()
+		# frappe.msgprint(patient_data)
+		# processed_patient_data = bundle.parse_obj(patient_data.json())
+		return json.loads(patient_data.text)
 	except ResourceNotFound as e:
 		frappe.throw(f'{e}.')
 	except MultipleResourcesFound as e:
@@ -57,12 +63,12 @@ def update_patient_details(shr, patient, payload):
 		frappe.throw(f'{e}.')
 
 @frappe.whitelist()
-def shr_post_patient(payload):
-	shr = fhir_server_connect()
+def shr_post_patient(payload, facility_provider):
 	patient = Patient()
 
 	#SEARCH FOR PATIENT WITH SAME ID. IF EXISTING, DO AN UPDATE INSTEAD.
 	client_id = payload.get('client_id')
+	# frappe.msgprint('CLIENT: ' + client_id)
 	patients_resources = shr.resources('Patient')
 	patient_with_id_obj = patients_resources.search(identifier__value = client_id).first()
 	patient_with_id = Patient.parse_obj(patient_with_id_obj.serialize()) if patient_with_id_obj else None
@@ -71,7 +77,7 @@ def shr_post_patient(payload):
 	#SAVE THE ID
 	identifier = Identifier()
 	identifier.value = client_id
-	identifier.system = 'https://client_registry.lonius.cloud'
+	identifier.system = 'https://client-registry.lonius.cloud'
 	identifier.use = "official"
 	patient.identifier = [identifier]
 	
@@ -82,7 +88,7 @@ def shr_post_patient(payload):
 		patient.birthDate = birth_date
 
 	#SAVE THE GENDER
-	if payload.get('gender'): patient.gender = payload.get('gender')
+	if payload.get('gender'): patient.gender = payload.get('gender').lower()
 
 	#SAVE THE NAME
 	name = HumanName()
@@ -111,4 +117,9 @@ def shr_post_patient(payload):
 	# patients_resources = shr.resources('Patient')
 	# patient_with_id_obj = patients_resources.search(identifier__value = client_id).first()
 	# patient_with_id = Patient.parse_obj(patient_with_id_obj.serialize()) if patient_with_id_obj else None
+	return patient
+
+def _get_patient(patient_id):
+	patient = shr.reference('Patient', patient_id).to_resource() #shr.resources('Patient')
+	# patient.search(_id=patient_id)
 	return patient

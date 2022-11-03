@@ -1,0 +1,101 @@
+[
+ {
+  "category": "EMR - Patient Registration",
+  "description": "Registration of new patient to the SHR and Patient Registry",
+  "docstatus": 0,
+  "doctype": "Connection Category",
+  "modified": "2022-11-02 11:37:39.730346",
+  "name": "xCAT001",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ },
+ {
+  "category": "EMR - Request Patient Summary",
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Connection Category",
+  "modified": "2022-11-02 11:57:16.233378",
+  "name": "xCAT002",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ },
+ {
+  "category": "EMR - Post Vital Signs",
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Connection Category",
+  "modified": "2022-11-02 11:57:29.777365",
+  "name": "xCAT003",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ },
+ {
+  "category": "EMR - Post Patient Appointment",
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Connection Category",
+  "modified": "2022-11-02 11:57:51.516926",
+  "name": "xCAT004",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ },
+ {
+  "category": "EMR - Post Lab Result",
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Connection Category",
+  "modified": "2022-11-02 11:58:19.739643",
+  "name": "xCAT005",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ },
+ {
+  "category": "EMR - Post Encounter Information",
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Connection Category",
+  "modified": "2022-11-02 11:58:50.363490",
+  "name": "xCAT006",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ },
+ {
+  "category": "EMR - Post Procedure Report",
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Connection Category",
+  "modified": "2022-11-02 12:32:21.928886",
+  "name": "xCAT007",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ },
+ {
+  "category": "Facility Registry - Register New Facility",
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Connection Category",
+  "modified": "2022-11-02 12:32:44.664236",
+  "name": "xCAT008",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ },
+ {
+  "category": "Provider Registry - Register New Provider",
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Connection Category",
+  "modified": "2022-11-02 12:33:42.027423",
+  "name": "xCAT009",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null
+ }
+]

@@ -27,10 +27,10 @@ def post_patient(payload):
 	#VALIDATE PAYLOAD. TO BE MOVED TO ITS OWN FUNCTION ONCE WE IMPLEMENT ONE PAYLOAD FROM CLIENT.
 	_validate_patient_payload(payload)
  
-	validate_facility_provider(payload.get("facility_id"), payload.get("provider_id"))
+	facility_provider = validate_facility_provider(payload.get("facility_id"), payload.get("provider_id"))
 	#PUSH TO THE CLIENT REGISTRY AND RETURN PATIENT ID IF NONE EXISTED
 	client_registry_patient = post_client(payload)
-	shr_patient = shr_post_patient(client_registry_patient)
+	shr_patient = shr_post_patient(payload = client_registry_patient, facility_provider = facility_provider)
 	return shr_patient
 
 def _validate_patient_payload(payload):

@@ -1,9 +1,10 @@
 import frappe
+from exchange.api.shr_fhir.organization import shr_process_organization
 
 @frappe.whitelist()
 def create_credentials(payload):
 	payload = frappe._dict(payload)
-	email, facility_name = payload.get("email"), payload.get("facility_name")
+	email, facility_name, facility_id = payload.get("email"), payload.get("facility_name"), payload.get("facility_id")
 	if not email or not facility_name:
 		frappe.throw("Please provide both the email and facility name in order to register.")
 	frappe.only_for("System Manager")
@@ -16,6 +17,7 @@ def create_credentials(payload):
 		"send_welcome_email": 0,
 		"email": email,
 		"first_name": facility_name,
+		"username": facility_id,
 		"user_type": "System User",
 		"api_secret": api_secret,
 		"api_key": api_key,
@@ -34,6 +36,9 @@ def create_credentials(payload):
 	frappe.get_doc(role_args).db_insert()
 	user = frappe.get_doc("User", email, cache=False)
 	user.api_secret = api_secret
+
+	#REGISTER THE FACILITY IN THE SHR FOR FUTURE REFERENCES. (FHIR ORGANIZATION)
+	shr_process_organization(user)
 	return user
 	# user = frappe.get_doc(dict(
 	# 	doctype="User",
@@ -69,6 +74,9 @@ def generate_api_keys(user):
 
 @frappe.whitelist()
 def validate_facility(facility_id):
-    #CONNECT TO THE PROVIDER REGISTRY AND CHECK FOR EXISTENCE OF THE ID WHETHER VALID (E.G. LICENCE)
-    #THE PROVIDER REGISTRY SHOULD VALIDATE LICENCE VALIDITY BEFORE RETURNING TRUE
-    return True
+	this_user_data = frappe.get_doc("User", frappe.session.user)
+	
+ 	#POST TO THE SHR FOR PROCESSING
+	facility_shr_id = shr_process_organization(this_user_data)
+	facility_name = this_user_data.get('first_name')
+	return facility_shr_id, facility_name#payload[0].get('pn')

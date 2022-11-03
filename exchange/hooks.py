@@ -9,6 +9,11 @@ app_color = "grey"
 app_email = "info@lonius.co.ke"
 app_license = "MIT"
 
+fixtures = [
+	{
+        "doctype": "Connection Category"
+	}
+]
 # Includes in <head>
 # ------------------
 
