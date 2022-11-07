@@ -109,5 +109,7 @@
    "type": "DocType"
   }
  ],
- "shortcuts_label": "Exchange Quick View"
+ "shortcuts_label": "Exchange Quick View",
+ "title": "Health Exchange",
+ "public": 1
 }
